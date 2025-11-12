@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API编排引擎 - 测试页面</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f5f5f5;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .test-section h2 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+        
+        .test-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+            transition: transform 0.2s;
+        }
+        
+        .test-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        
+        .test-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .result {
+            margin-top: 15px;
+            padding: 15px;
+            background: white;
+            border-radius: 6px;
+            border: 1px solid #e0e0e0;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .success {
+            color: #52c41a;
+            font-weight: bold;
+        }
+        
+        .error {
+            color: #ff4d4f;
+            font-weight: bold;
+        }
+        
+        .info {
+            background: #e6f7ff;
+            border-left: 4px solid #1890ff;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+        
+        .status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+        
+        .status.online {
+            background: #f6ffed;
+            color: #52c41a;
+            border: 1px solid #b7eb8f;
+        }
+        
+        .status.offline {
+            background: #fff1f0;
+            color: #ff4d4f;
+            border: 1px solid #ffccc7;
+        }
+        
+        pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔧 API编排引擎测试</h1>
+            <p>快速验证系统功能是否正常</p>
+        </div>
+        
+        <div class="content">
+            <div class="info">
+                <strong>📝 使用说明：</strong>
+                <ol style="margin-left: 20px; margin-top: 10px;">
+                    <li>确保后端服务已启动: <code>cd backend && python3 main.py</code></li>
+                    <li>点击下方按钮测试各项功能</li>
+                    <li>查看测试结果确认系统运行正常</li>
+                </ol>
+            </div>
+            
+            <div class="test-section">
+                <h2>🔌 连接状态检查</h2>
+                <button class="test-button" onclick="checkConnection()">检查后端连接</button>
+                <span id="status-badge"></span>
+                <div id="connection-result" class="result" style="display: none;"></div>
+            </div>
+            
+            <div class="test-section">
+                <h2>🔧 工具管理测试</h2>
+                <button class="test-button" onclick="testGetTools()">获取工具列表</button>
+                <button class="test-button" onclick="testCreateTool()">创建测试工具</button>
+                <button class="test-button" onclick="createExampleTools()">创建示例工具</button>
+                <div id="tools-result" class="result" style="display: none;"></div>
+            </div>
+            
+            <div class="test-section">
+                <h2>📊 工作流管理测试</h2>
+                <button class="test-button" onclick="testGetWorkflows()">获取工作流列表</button>
+                <button class="test-button" onclick="testCreateWorkflow()">创建测试工作流</button>
+                <div id="workflows-result" class="result" style="display: none;"></div>
+            </div>
+            
+            <div class="test-section">
+                <h2>▶️ 工作流执行测试</h2>
+                <button class="test-button" onclick="testExecuteWorkflow()">执行工作流</button>
+                <div id="execution-result" class="result" style="display: none;"></div>
+            </div>
+            
+            <div class="test-section">
+                <h2>📚 访问完整应用</h2>
+                <p style="margin-bottom: 15px;">测试通过后，启动前端访问完整应用：</p>
+                <button class="test-button" onclick="window.open('http://localhost:5173', '_blank')">打开前端应用</button>
+                <button class="test-button" onclick="window.open('http://localhost:8000/docs', '_blank')">打开API文档</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const API_BASE = 'http://localhost:8000';
+        let lastWorkflowId = null;
+        
+        function showResult(elementId, content, isError = false) {
+            const element = document.getElementById(elementId);
+            element.style.display = 'block';
+            element.innerHTML = `<pre class="${isError ? 'error' : 'success'}">${content}</pre>`;
+        }
+        
+        async function checkConnection() {
+            const badge = document.getElementById('status-badge');
+            try {
+                const response = await fetch(`${API_BASE}/`);
+                const data = await response.json();
+                showResult('connection-result', `✅ 连接成功！\n\n${JSON.stringify(data, null, 2)}`);
+                badge.innerHTML = '<span class="status online">● 在线</span>';
+            } catch (error) {
+                showResult('connection-result', `❌ 连接失败！\n\n错误: ${error.message}\n\n请确保后端服务已启动: cd backend && python3 main.py`, true);
+                badge.innerHTML = '<span class="status offline">● 离线</span>';
+            }
+        }
+        
+        async function testGetTools() {
+            try {
+                const response = await fetch(`${API_BASE}/api/tools/`);
+                const data = await response.json();
+                showResult('tools-result', `✅ 获取工具列表成功！\n\n找到 ${data.length} 个工具\n\n${JSON.stringify(data, null, 2)}`);
+            } catch (error) {
+                showResult('tools-result', `❌ 获取工具列表失败！\n\n${error.message}`, true);
+            }
+        }
+        
+        async function testCreateTool() {
+            const toolData = {
+                name: `测试工具_${Date.now()}`,
+                description: "这是一个通过测试页面创建的工具",
+                category: "测试",
+                config: {
+                    parameters: [
+                        {name: "input", type: "string", required: true}
+                    ]
+                },
+                code: "def execute(inputs, context):\n    return f\"Hello {inputs.get('input', 'World')}\""
+            };
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/tools/`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(toolData)
+                });
+                const data = await response.json();
+                showResult('tools-result', `✅ 创建工具成功！\n\n工具ID: ${data.id}\n工具名称: ${data.name}\n\n${JSON.stringify(data, null, 2)}`);
+            } catch (error) {
+                showResult('tools-result', `❌ 创建工具失败！\n\n${error.message}`, true);
+            }
+        }
+        
+        async function createExampleTools() {
+            showResult('tools-result', '⏳ 正在创建示例工具...');
+            
+            const tools = [
+                {
+                    name: "HTTP_GET请求",
+                    description: "发送HTTP GET请求",
+                    category: "API",
+                    config: {parameters: [{name: "url", type: "string", required: true}]},
+                    code: "def execute(inputs, context):\n    import httpx\n    url = inputs.get('url')\n    response = httpx.get(url)\n    return response.json()"
+                },
+                {
+                    name: "文本转大写",
+                    description: "将文本转换为大写",
+                    category: "文本处理",
+                    config: {parameters: [{name: "text", type: "string", required: true}]},
+                    code: "def execute(inputs, context):\n    text = inputs.get('text', '')\n    return text.upper()"
+                },
+                {
+                    name: "数学加法",
+                    description: "计算两数之和",
+                    category: "数据处理",
+                    config: {parameters: [
+                        {name: "a", type: "number", required: true},
+                        {name: "b", type: "number", required: true}
+                    ]},
+                    code: "def execute(inputs, context):\n    a = float(inputs.get('a', 0))\n    b = float(inputs.get('b', 0))\n    return a + b"
+                }
+            ];
+            
+            let created = 0;
+            let failed = 0;
+            
+            for (const tool of tools) {
+                try {
+                    await fetch(`${API_BASE}/api/tools/`, {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify(tool)
+                    });
+                    created++;
+                } catch (error) {
+                    failed++;
+                }
+            }
+            
+            showResult('tools-result', `✅ 创建完成！\n\n成功: ${created} 个\n失败: ${failed} 个`);
+        }
+        
+        async function testGetWorkflows() {
+            try {
+                const response = await fetch(`${API_BASE}/api/workflows/`);
+                const data = await response.json();
+                showResult('workflows-result', `✅ 获取工作流列表成功！\n\n找到 ${data.length} 个工作流\n\n${JSON.stringify(data, null, 2)}`);
+            } catch (error) {
+                showResult('workflows-result', `❌ 获取工作流列表失败！\n\n${error.message}`, true);
+            }
+        }
+        
+        async function testCreateWorkflow() {
+            const workflowData = {
+                name: `测试工作流_${Date.now()}`,
+                description: "通过测试页面创建的工作流",
+                nodes: [
+                    {
+                        id: "node_start",
+                        type: "custom",
+                        position: {x: 100, y: 100},
+                        data: {type: "start", label: "开始", config: {}}
+                    },
+                    {
+                        id: "node_end",
+                        type: "custom",
+                        position: {x: 100, y: 200},
+                        data: {type: "end", label: "结束", config: {output_key: "result"}}
+                    }
+                ],
+                edges: [
+                    {id: "edge_1", source: "node_start", target: "node_end"}
+                ],
+                variables: {test: "value"}
+            };
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/workflows/`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(workflowData)
+                });
+                const data = await response.json();
+                lastWorkflowId = data.id;
+                showResult('workflows-result', `✅ 创建工作流成功！\n\n工作流ID: ${data.id}\n工作流名称: ${data.name}\n节点数: ${data.nodes.length}\n\n${JSON.stringify(data, null, 2)}`);
+            } catch (error) {
+                showResult('workflows-result', `❌ 创建工作流失败！\n\n${error.message}`, true);
+            }
+        }
+        
+        async function testExecuteWorkflow() {
+            if (!lastWorkflowId) {
+                showResult('execution-result', '⚠️ 请先创建一个工作流！', true);
+                return;
+            }
+            
+            showResult('execution-result', '⏳ 正在执行工作流...');
+            
+            const executionData = {
+                workflow_id: lastWorkflowId,
+                input_data: {test_input: "Hello World"}
+            };
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/execution/run`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(executionData)
+                });
+                const data = await response.json();
+                
+                let logsText = '';
+                if (data.logs && data.logs.length > 0) {
+                    logsText = '\n\n执行日志:\n' + data.logs.map(log => 
+                        `[${log.level}] ${log.message}`
+                    ).join('\n');
+                }
+                
+                showResult('execution-result', 
+                    `✅ 工作流执行成功！\n\n` +
+                    `执行ID: ${data.id}\n` +
+                    `状态: ${data.status}\n` +
+                    `输出: ${JSON.stringify(data.output_data, null, 2)}` +
+                    logsText
+                );
+            } catch (error) {
+                showResult('execution-result', `❌ 执行工作流失败！\n\n${error.message}`, true);
+            }
+        }
+        
+        // 页面加载时自动检查连接
+        window.onload = function() {
+            checkConnection();
+        };
+    </script>
+</body>
+</html>
